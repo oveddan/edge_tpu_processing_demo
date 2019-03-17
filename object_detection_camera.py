@@ -29,19 +29,6 @@ import numpy as np
 from PIL import Image
 from PIL import ImageDraw
 
-
-# Function to read labels from text files.
-def ReadLabelFile(file_path):
-  with open(file_path, 'r') as f:
-    lines = f.readlines()
-  ret = {}
-  for line in lines:
-    pair = line.strip().split(maxsplit=1)
-    ret[int(pair[0])] = pair[1].strip()
-  return ret
-
-
-
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument(
@@ -63,20 +50,20 @@ def main():
   frames = 0
   start_seconds = time.time()
 
-  full_size_w = 640
-  full_size_h = 480
+  FULL_SIZE_W = 640
+  FULL_SIZE_H = 480
 
-  img = Image.new('RGBA', (full_size_w, full_size_h))
+  img = Image.new('RGBA', (FULL_SIZE_W, FULL_SIZE_H))
   draw = ImageDraw.Draw(img)
 
   # Open image.
   with picamera.PiCamera() as camera:
-    camera.resolution = (full_size_w, full_size_h)
+    camera.resolution = (FULL_SIZE_W, FULL_SIZE_H)
     camera.framerate = 30
     _, width, height, channels = engine.get_input_tensor_shape()
     
     print('input dims', width, height)
-    camera.start_preview(fullscreen=False, window=(700, 200, full_size_w,full_size_h))
+    camera.start_preview(fullscreen=False, window=(700, 200, FULL_SIZE_W,FULL_SIZE_H))
     #  camera.start_preview()
 
     # rasberry pi requires images to be resizes to multiples of 32x16
@@ -88,8 +75,8 @@ def main():
     padding_w = (width - valid_resize_w)//2
     padding_h = (height - valid_resize_h)//2
 
-    scale_w = full_size_w / width
-    scale_h = full_size_h / height
+    scale_w = FULL_SIZE_W / width
+    scale_h = FULL_SIZE_H / height
 
     try:
       stream = io.BytesIO()
@@ -124,9 +111,9 @@ def main():
                   results, \
                   (valid_resize_w, valid_resize_h),\
                   (padding_w, padding_h), \
-                  (full_size_w, full_size_h))
+                  (FULL_SIZE_W, FULL_SIZE_H))
         else:
-          boxes = scale_boxes(results, (full_size_w, full_size_h))
+          boxes = scale_boxes(results, (FULL_SIZE_W, FULL_SIZE_H))
 
         if args.draw:
           img.putalpha(0)
@@ -136,7 +123,7 @@ def main():
           #  display_results(ans, labels, img)
           imbytes = img.tobytes()
           if renderer == None:
-            renderer = camera.add_overlay(imbytes, size=img.size, layer=4, format='rgba', fullscreen=False,window=(700, 200, 640, full_size_h))
+            renderer = camera.add_overlay(imbytes, size=img.size, layer=4, format='rgba', fullscreen=False,window=(700, 200, 640, FULL_SIZE_H))
           else:
             #  print('updating')
             renderer.update(imbytes)
@@ -152,26 +139,6 @@ def main():
     finally:
       camera.stop_preview()
 
-
-def translate_and_scale_boxes(results, padded_size, padding, full_size):
-  return list(map(lambda result: translate_and_scale(\
-          result.bounding_box, padded_size, padding, full_size), results))
-
-def translate_and_scale(box, padded_size,padding, full_size):
-  scale = (full_size[0] / padded_size[0], full_size[1] / padded_size[1])
-  return (box * padded_size + padding) * scale
-
-def scale_boxes(results, full_size):
-  return list(map(lambda result: result.bounding_box * (full_size[0], full_size[1]), results))
-
-def pad_and_flatten(input, img_size, padding_h, padding_w):
-  padded = np.pad(
-               input.reshape((img_size[0], img_size[1], 3)),
-               ((padding_h, padding_h), (padding_w, padding_w), (0, 0)),
-               'constant')
-  # flatten
-  padded.shape = (padded.shape[0] * padded.shape[1] * padded.shape[2])
-  return padded
 
 def draw_boxes(draw, boxes):
   for box in boxes:
