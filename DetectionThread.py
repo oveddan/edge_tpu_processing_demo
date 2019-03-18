@@ -1,33 +1,19 @@
-from threading import Thread
-from PiCamStream import PiCamStream 
+from threading import Thread, get_ident
 from lib import read_label_file
 from edgetpu.detection.engine import DetectionEngine
 import time
 
-class DetectionStream:
-    def __init__(self, model_path, labels_path=None):
-        #  print('loading model at', model_path, labels_path)
-        self.engine = DetectionEngine(model_path)
+class DetectionThread:
+    def __init__(self, engine, camera_capture_thread, labels_path=None):
+        self.engine = engine
         
-        _, width, height, channels = self.engine.get_input_tensor_shape()
-
-        self.width = width
-        self.height = height
-
         if (labels_path is not None):
           self.labels = read_label_file(labels_path)
         else:
           self.labels = None
 
-        self.picam_stream = PiCamStream(width, height).start()
-
-        frame, frame_time = self.picam_stream.read()
-
-        self.frame_time = frame_time
-
-        if frame is not None:
-            self.detect(frame)
-
+        self.camera_capture_thread = camera_capture_thread
+        self.frame_time = None
         self.stopped = False
         self.detected_boxes = None
         self.detected_labels = None
@@ -44,11 +30,13 @@ class DetectionStream:
             if self.stopped:
                 return
 
+            frame, frame_time = self.camera_capture_thread.read()
 
-            frame, frame_time = self.picam_stream.read()
-            self.frame_time = frame_time
+            if frame is None or frame_time == self.frame_time:
+                time.sleep(0.01)
+            else:
+                self.frame_time = frame_time
 
-            if frame is not None:
                 self.detect(frame)
 
     def read(self):
@@ -58,9 +46,9 @@ class DetectionStream:
         start_s = time.time()
         results = self.engine.DetectWithInputTensor(frame, threshold=0.25,
                        top_k=10)
-        print('inference time', (time.time()- start_s) * 1000)
+        print('inference time',  get_ident(), (time.time()- start_s) * 1000)
 
-        self.detected_boxes = self.picam_stream.boxes_to_original_size(results)
+        self.detected_boxes = self.camera_capture_thread.boxes_to_original_size(results)
 
         if self.labels:
             self.detected_labels = list(map(lambda result: self.labels[result.label_id], results))

@@ -1,6 +1,8 @@
 import argparse
+from edgetpu.detection.engine import DetectionEngine
 
-from DetectionStream import DetectionStream
+from DetectionThread import DetectionThread
+from CameraCaptureThread import CameraCaptureThread 
 
 def main():
     parser = argparse.ArgumentParser()
@@ -12,12 +14,16 @@ def main():
       '--label', help='Path of the labels file.')
     args = parser.parse_args()
 
-    detection_stream = DetectionStream(args.model, args.label)
+    engine = DetectionEngine(args.model)
+    _, width, height, channels = engine.get_input_tensor_shape()
 
-    detection_stream.start()
+    camera_capture_thread = CameraCaptureThread(width, height).start()
 
+    detection_thread = DetectionThread(engine, camera_capture_thread, args.label).start()
+
+    #  draw_thread = DrawThread(detection_thread)
     while True:
-      (detected_boxes, detected_labels) = detection_stream.read()
+      (detected_boxes, detected_labels) = detection_thread.read()
 
       #  if detected_boxes is not None:
           #  print(detected_boxes)

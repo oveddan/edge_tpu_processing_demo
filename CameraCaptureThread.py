@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, get_ident
 from lib import pad_and_flatten, translate_and_scale_boxes, scale_boxes
 import io
 import picamera
@@ -11,7 +11,7 @@ FULL_SIZE_H = 480
 # rasberry pi requires images to be resizes to multiples of 32x16
 CAMERA_MULTIPLE = (16, 32)
 
-class PiCamStream:
+class CameraCaptureThread:
     def __init__(self, tensor_width, tensor_height):
         self.tensor_width = tensor_width
         self.tensor_height = tensor_height
@@ -23,7 +23,7 @@ class PiCamStream:
         self.padding_h = (tensor_height - self.valid_resize_h)//2
 
         self.frame = None
-        self.frame_time = None
+        self.frame_time = time.time()
 
     def start(self):
         t = Thread(target=self.update, args=())
@@ -45,9 +45,9 @@ class PiCamStream:
                   #  format='jpeg',
                   use_video_port=True,
                   resize=(self.valid_resize_w, self.valid_resize_h)):
+                self.frame_time = time.time()
                 stream.truncate()
                 stream.seek(0)
-                self.frame_time = time.time()
 
                 input = np.frombuffer(stream.getvalue(), dtype=np.uint8)
                 
