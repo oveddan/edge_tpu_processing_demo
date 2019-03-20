@@ -82,7 +82,7 @@ def main():
 
   print('waiting for client')
 
-  conn, addr = s.accept()
+  #  conn, addr = s.accept()
 
   print('Connection address:', addr)
   # Open image.
@@ -110,7 +110,8 @@ def main():
         message = json.dumps({'results': output})
 
         #  print('sending', message)
-        conn.send(message.encode('utf-8'))
+        #  conn.send(message.encode('utf-8'))
+        receiveSocket.sendto(message.encode('utf-8'), addr)
       #  receivedBytes=bytearray()
       
     
