@@ -26,15 +26,18 @@ import socket
 import io
 import time
 import numpy as np
+import json
+from lib import read_label_file
 from PIL import Image
 from PIL import ImageDraw
 
 
-TCP_IP = '192.168.2.183'
-UDP_IP = '192.168.2.183'
+#  UDP_IP = '192.168.2.183'
+UDP_IP = '127.0.0.1'
+TCP_IP = UDP_IP
 #  TCP_IP = '10.0.0.1'
-UDP_PORT = 7000
-TCP_PORT = 7000
+UDP_RECEIVE_PORT = 9100
+TCP_PORT = 9101
 #  BUFFER_SIZE = 1024
 
 def main():
@@ -51,7 +54,7 @@ def main():
 
   # Initialize engine.
   engine = DetectionEngine(args.model)
-  labels = ReadLabelFile(args.label) if args.label else None
+  labels = read_label_file(args.label) if args.label else None
 
   shown = False
 
@@ -61,48 +64,54 @@ def main():
   print('opening socket.')
 
   #  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  receiveSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.bind((TCP_IP, TCP_PORT))
+  s.listen(1)
+  #  senderSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-  #  s.bind((TCP_IP, TCP_PORT))
-  #  s.listen(1)
-  s.bind((UDP_IP, UDP_PORT))
+  receiveSocket.bind((UDP_IP, UDP_RECEIVE_PORT))
+  #  senderSocket.bind((UDP_IP, UDP_SEND_PORT))
 
   print('listening...')
 
-  #  conn, addr = s.accept()
-
-  #  print('accepted connection', addr)
-  
   _, width, height, channels = engine.get_input_tensor_shape()
-
 
   imageSize = width*height*3
 
-  receivedBytes = bytearray()
 
+  print('waiting for client')
 
-  start_s = time.time()
+  conn, addr = s.accept()
+
+  print('Connection address:', addr)
   # Open image.
   while 1:
-    #  print('waiting')
+    data, addr = receiveSocket.recvfrom(66507)
 
-    #  data = conn.recv(66507)
+    if (len(data) > 0):
+        start_s = time.time()
 
-    data, addr = s.recvfrom(66507)
+        try:
+           image = Image.open(io.BytesIO(data)).convert('RGB')
+        except OSError:
+           print('Could not read image')
+           continue
 
-    receivedBytes+= data
+        input = np.frombuffer(image.tobytes(), dtype=np.uint8)
 
-    if (len(receivedBytes) > imageSize):
-
-      input = np.frombuffer(receivedBytes[:imageSize], dtype=np.uint8)
-
-      results = engine.DetectWithInputTensor(input, threshold=0.25,
+        results = engine.DetectWithInputTensor(input, threshold=0.25,
                        top_k=10)
- 
-      print((time.time() - start_s) * 1000)
+     
+        print('time to process image', (time.time() - start_s) * 1000)
 
-      start_s = time.time()
-      receivedBytes=bytearray()
+        output = to_output(results, image.size, labels)
+        
+        message = json.dumps({'results': output})
+
+        #  print('sending', message)
+        conn.send(message.encode('utf-8'))
+      #  receivedBytes=bytearray()
       
     
     #  start_s = time.time()
@@ -112,65 +121,28 @@ def main():
                        #  top_k=10)
     #  elapsed_s = time.time() - start_s
 
-    #  boxes = scale_boxes(results, (width, height))
 
-    #  conn.send(boxes)
  
   #  conn.close()
 
-
-def translate_and_scale_boxes(results, padded_size, padding, full_size):
-  return list(map(lambda result: translate_and_scale(\
-          result.bounding_box, padded_size, padding, full_size), results))
-
-def translate_and_scale(box, padded_size,padding, full_size):
-  scale = (full_size[0] / padded_size[0], full_size[1] / padded_size[1])
-  return (box * padded_size + padding) * scale
+def to_output(results, full_size, labels):
+    return list(map(lambda result: { \
+            'box': scale_box(result.bounding_box, full_size),\
+            'label': labels[result.label_id] if labels is not None else None
+            }, results))
 
 def scale_boxes(results, full_size):
-  return list(map(lambda result: result.bounding_box * (full_size[0], full_size[1]), results))
+    return list(map(lambda result: \
+          (scale_box(result.bounding_box, full_size)).tolist(), results))
 
-def pad_and_flatten(input, img_size, padding_h, padding_w):
-  padded = np.pad(
-               input.reshape((img_size[0], img_size[1], 3)),
-               ((padding_h, padding_h), (padding_w, padding_w), (0, 0)),
-               'constant')
-  # flatten
-  padded.shape = (padded.shape[0] * padded.shape[1] * padded.shape[2])
-  return padded
+def to_label_texts(results, labels):
+    if labels is None:
+        return None
+    else:
+        return list(map(lambda result: labels[result.label_id], results))
 
-def draw_boxes(draw, boxes):
-  for box in boxes:
-    draw.rectangle(box.flatten().tolist(), outline='red')
-
-def draw_text(draw, results, boxes, labels):
-  for i, result in enumerate(results):
-    label = labels[result.label_id]
-    box = boxes[i]
-    draw.text((box[0][0], box[0][1]), label, fill='red')
-
-def display_results(ans, labels, img):
-  #  print('RESULTS:', time.time())
-  draw = ImageDraw.Draw(img)
-  for obj in ans:
-    print ('-----------------------------------------')
-    if labels:
-      print(obj.label_id, labels[obj.label_id])
-    print ('score = ', obj.score)
-    box = obj.bounding_box.flatten().tolist()
-    if(obj.score > 0.5):
-      draw.rectangle(box, outline='red')
-    print ('box = ', box)
-
-# Function to read labels from text files.
-def ReadLabelFile(file_path):
-  with open(file_path, 'r') as f:
-    lines = f.readlines()
-  ret = {}
-  for line in lines:
-    pair = line.strip().split(maxsplit=1)
-    ret[int(pair[0])] = pair[1].strip()
-  return ret
+def scale_box(box, full_size):
+    return (box* (full_size[0], full_size[1])).flatten().tolist()
 
 if __name__ == '__main__':
   main()
