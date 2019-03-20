@@ -37,6 +37,7 @@ UDP_IP = '127.0.0.1'
 TCP_IP = UDP_IP
 #  TCP_IP = '10.0.0.1'
 UDP_RECEIVE_PORT = 9100
+UDP_SEND_PORT = 9101
 TCP_PORT = 9101
 #  BUFFER_SIZE = 1024
 
@@ -65,9 +66,10 @@ def main():
 
   #  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   receiveSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  s.bind((TCP_IP, TCP_PORT))
-  s.listen(1)
+  senderSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  #  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  #  s.bind((TCP_IP, TCP_PORT))
+  #  s.listen(1)
   #  senderSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
   receiveSocket.bind((UDP_IP, UDP_RECEIVE_PORT))
@@ -84,7 +86,7 @@ def main():
 
   #  conn, addr = s.accept()
 
-  print('Connection address:', addr)
+  #  print('Connection address:', addr)
   # Open image.
   while 1:
     data, addr = receiveSocket.recvfrom(66507)
@@ -107,11 +109,12 @@ def main():
 
         output = to_output(results, image.size, labels)
         
-        message = json.dumps({'results': output})
+        message = json.dumps({'results': output}) + '|'
 
         #  print('sending', message)
         #  conn.send(message.encode('utf-8'))
-        receiveSocket.sendto(message.encode('utf-8'), addr)
+        #  receiveSocket.sendto(message.encode('utf-8'), addr)
+        senderSocket.sendto(message.encode('utf-8'), (UDP_IP, UDP_SEND_PORT))
       #  receivedBytes=bytearray()
       
     

@@ -36,7 +36,11 @@ class BroadcastThread extends Thread {
   void run() {
     while (running) {
       if (newFrame) {
+        //println("broadcasting");
         broadcast(lastImage);
+        
+        //println("checking for response");
+        //checkForResponse();
       }
     }
   }
@@ -45,6 +49,23 @@ class BroadcastThread extends Thread {
     lastImage = img;
     newFrame = true;
   }
+  
+  //void checkForResponse() {
+  //  DatagramPacket p = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+    
+  //  try {
+  //    ds.receive(p);
+  //  } catch (IOException e) {
+  //    e.printStackTrace();
+  //  }
+    
+  //  byte[] data = p.getData();
+    
+  //  String responseString = (new String(data)).trim();
+    
+  //  println("got response:");
+  //  println(responseString);
+  //}
   
   // Function to broadcast a PImage over UDP
   // Special thanks to: http://ubaa.net/shared/processing/udp/
@@ -74,7 +95,7 @@ class BroadcastThread extends Thread {
     byte[] packet = baStream.toByteArray();
   
     // Send JPEG data as a datagram
-    println("Sending datagram with " + packet.length + " bytes");
+    //println("Sending datagram with " + packet.length + " bytes");
     try {
       ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName("localhost"),clientPort));
     } 
