@@ -1,1 +1,1 @@
-python3 object_detection_camera_threaded.py --model ../test_data/mobilenet_ssd_v2_face_quant_postprocess_edgetpu.tflite
+python3 object_detection_camera.py --model ../test_data/mobilenet_ssd_v2_face_quant_postprocess_edgetpu.tflite

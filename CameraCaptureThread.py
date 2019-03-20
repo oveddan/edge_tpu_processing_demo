@@ -12,7 +12,8 @@ FULL_SIZE_H = 480
 CAMERA_MULTIPLE = (16, 32)
 
 class CameraCaptureThread:
-    def __init__(self, tensor_width, tensor_height):
+    def __init__(self, stream, tensor_width, tensor_height):
+        self.stream = stream
         self.tensor_width = tensor_width
         self.tensor_height = tensor_height
 
@@ -33,24 +34,16 @@ class CameraCaptureThread:
         return self
 
     def update(self):
-        with picamera.PiCamera() as camera:
-            camera.resolution = (FULL_SIZE_W, FULL_SIZE_H)
-            camera.framerate = 30
+        stream = self.stream
+        while True:
+            bytes = stream.getvalue()
 
-            camera.start_preview(fullscreen=False, window=(700, 200, FULL_SIZE_W,FULL_SIZE_H))
- 
-            stream = io.BytesIO()
-            for foo in camera.capture_continuous(stream,
-                  format='rgb',
-                  #  format='jpeg',
-                  use_video_port=True,
-                  resize=(self.valid_resize_w, self.valid_resize_h)):
+            if len(bytes) == 0:
+                time.sleep(0.01)
+            else:
                 self.frame_time = time.time()
-                stream.truncate()
-                stream.seek(0)
+                input = np.frombuffer(bytes, dtype=np.uint8)
 
-                input = np.frombuffer(stream.getvalue(), dtype=np.uint8)
-                
                 if self.padding_w > 0 or self.padding_h > 0:
                     self.frame = pad_and_flatten(input, \
                             (self.valid_resize_h, self.valid_resize_w), \

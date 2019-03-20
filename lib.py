@@ -31,4 +31,19 @@ def pad_and_flatten(input, img_size, padding_h, padding_w):
   padded.shape = (padded.shape[0] * padded.shape[1] * padded.shape[2])
   return padded
 
+def draw_boxes(draw, boxes):
+  for box in boxes:
+    draw.rectangle(box.flatten().tolist(), outline='red')
+
+def draw_labels(draw, results, boxes, labels):
+  for i, result in enumerate(results):
+    label = labels[result.label_id]
+    box = boxes[i]
+    draw.text((box[0][0], box[0][1]), label, fill='red')
+
+def draw_text(draw, labels, boxes):
+  for i, label in enumerate(labels):
+    box = boxes[i]
+    draw.text((box[0][0], box[0][1]), label, fill='red')
+
 

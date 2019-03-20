@@ -27,9 +27,6 @@ class DetectionThread:
 
     def update(self):
         while True:
-            if self.stopped:
-                return
-
             frame, frame_time = self.camera_capture_thread.read()
 
             if frame is None or frame_time == self.frame_time:
@@ -40,13 +37,13 @@ class DetectionThread:
                 self.detect(frame)
 
     def read(self):
-        return (self.detected_boxes, self.detected_labels)
+        return (self.detected_boxes, self.detected_labels, self.frame_time)
 
     def detect(self, frame):
         start_s = time.time()
         results = self.engine.DetectWithInputTensor(frame, threshold=0.25,
                        top_k=10)
-        print('inference time',  get_ident(), (time.time()- start_s) * 1000)
+        print('inference time',  (time.time()- start_s) * 1000)
 
         self.detected_boxes = self.camera_capture_thread.boxes_to_original_size(results)
 

@@ -28,6 +28,7 @@ import time
 import numpy as np
 from PIL import Image
 from PIL import ImageDraw
+from lib import draw_labels, draw_boxes, read_label_file, pad_and_flatten, translate_and_scale_boxes, scale_boxes
 
 def main():
   parser = argparse.ArgumentParser()
@@ -43,7 +44,7 @@ def main():
 
   # Initialize engine.
   engine = DetectionEngine(args.model)
-  labels = ReadLabelFile(args.label) if args.label else None
+  labels = read_label_file(args.label) if args.label else None
 
   shown = False
 
@@ -119,7 +120,7 @@ def main():
           img.putalpha(0)
           draw_boxes(draw, boxes)
           if labels:
-            draw_text(draw, results, boxes, labels)
+            draw_labels(draw, results, boxes, labels)
           #  display_results(ans, labels, img)
           imbytes = img.tobytes()
           if renderer == None:
@@ -139,16 +140,6 @@ def main():
     finally:
       camera.stop_preview()
 
-
-def draw_boxes(draw, boxes):
-  for box in boxes:
-    draw.rectangle(box.flatten().tolist(), outline='red')
-
-def draw_text(draw, results, boxes, labels):
-  for i, result in enumerate(results):
-    label = labels[result.label_id]
-    box = boxes[i]
-    draw.text((box[0][0], box[0][1]), label, fill='red')
 
 def display_results(ans, labels, img):
   #  print('RESULTS:', time.time())
