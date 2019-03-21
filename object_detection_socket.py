@@ -66,10 +66,10 @@ def main():
 
   #  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   receiveSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  senderSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  #  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  #  s.bind((TCP_IP, TCP_PORT))
-  #  s.listen(1)
+  #  senderSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.bind((TCP_IP, TCP_PORT))
+  s.listen(1)
   #  senderSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
   receiveSocket.bind((UDP_IP, UDP_RECEIVE_PORT))
@@ -84,9 +84,9 @@ def main():
 
   print('waiting for client')
 
-  #  conn, addr = s.accept()
+  conn, addr = s.accept()
 
-  #  print('Connection address:', addr)
+  print('Connection address:', addr)
   # Open image.
   while 1:
     data, addr = receiveSocket.recvfrom(66507)
@@ -112,9 +112,14 @@ def main():
         message = json.dumps({'results': output}) + '|'
 
         #  print('sending', message)
-        #  conn.send(message.encode('utf-8'))
+        try:
+            conn.send(message.encode('utf-8'))
+        except ConnectionResetError:
+            print('Socket disconnected...waiting for client')
+            conn, addr = s.accept()
+
         #  receiveSocket.sendto(message.encode('utf-8'), addr)
-        senderSocket.sendto(message.encode('utf-8'), (UDP_IP, UDP_SEND_PORT))
+        #  senderSocket.sendto(message.encode('utf-8'), (UDP_IP, UDP_SEND_PORT))
       #  receivedBytes=bytearray()
       
     

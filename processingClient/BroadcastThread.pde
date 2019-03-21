@@ -19,12 +19,6 @@ class BroadcastThread extends Thread {
     } catch (SocketException e) {
       e.printStackTrace();
     }
-    
-    pg = createGraphics(300, 300, P2D);
-  }
-  
-  void updateVideo() {
-    newFrame = true;
   }
   
   void start(){
@@ -36,11 +30,7 @@ class BroadcastThread extends Thread {
   void run() {
     while (running) {
       if (newFrame) {
-        //println("broadcasting");
         broadcast(lastImage);
-        
-        //println("checking for response");
-        //checkForResponse();
       }
     }
   }
@@ -49,23 +39,6 @@ class BroadcastThread extends Thread {
     lastImage = img;
     newFrame = true;
   }
-  
-  //void checkForResponse() {
-  //  DatagramPacket p = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-    
-  //  try {
-  //    ds.receive(p);
-  //  } catch (IOException e) {
-  //    e.printStackTrace();
-  //  }
-    
-  //  byte[] data = p.getData();
-    
-  //  String responseString = (new String(data)).trim();
-    
-  //  println("got response:");
-  //  println(responseString);
-  //}
   
   // Function to broadcast a PImage over UDP
   // Special thanks to: http://ubaa.net/shared/processing/udp/
