@@ -1,37 +1,48 @@
 import gohai.glvideo.*;
 GLCapture video;
 
-
-PGraphics inputImage;
-PGraphics resultsImage;
-
-int captureW = 640;
-int captureH = 480;
-
-float aspect = captureW * 1.0 / captureH;
+// CONFIGURATION
+int captureW = 320;
+int captureH = 240;
 
 // the width and height of the input image for
 // object detection
 int inputW = 300;
 int inputH = 300;
 
+int outputW = 320;
+int outputH = 240;
+
+// drawing config
+boolean debugInputImage = false;
+boolean drawResults = true;
+
+PGraphics inputImage;
+PGraphics resultsImage;
+
+float aspect = captureW * 1.0 / captureH;
+
 int resizeW = inputW;
 // resize but maintain aspect ratio
 int resizeH = floor(inputW / aspect);
-int paddingW = 0;
+int paddingW = (inputW - resizeW) / 2;
 // pad image to fit input size
 int paddingH = (inputH - resizeH) / 2;
+
+int fps = 25;
 
 BroadcastThread broadcastThread;
 ResultsReceivingThread receiverThread;
 
-boolean debugInputImage = false;
-boolean drawResults = true;
+void settings(){
+  size(outputW, outputH, P2D);
+  println(resizeW, resizeH, paddingW, paddingH);
+}
 
 void setup() {
-  size(640, 480, P2D); 
   inputImage = createGraphics(inputW, inputH, P2D);
-  resultsImage = createGraphics(width, height, P2D);
+  resultsImage = createGraphics(outputW, outputH, P2D);
+  frameRate(fps);
   
   // start threads
   broadcastThread = new BroadcastThread();
@@ -45,7 +56,7 @@ void setup() {
   printArray(devices);
   
   // use the first camera
-  video = new GLCapture(this, devices[0], captureW, captureH, 25);
+  video = new GLCapture(this, devices[0], captureW, captureH, fps);
 
   video.start();
 }
@@ -60,6 +71,10 @@ PImage captureAndScaleInputImage() {
   return inputImage.copy();
 }
 
+float padAndScale(float value, float padding, float scale) {
+  return (value - padding) * scale;
+}
+
 void updateResultsImage() {
   int numDetections = receiverThread.getNumDetections();
   float[][] boxes = receiverThread.getBoxes();
@@ -70,15 +85,23 @@ void updateResultsImage() {
   resultsImage.noFill();
   resultsImage.stroke(#ff0000);
   
+  
   for(int i = 0; i < numDetections; i++) {
-    float[] box = boxes[i];
+    float[] box = boxes[i]; 
+      
+    float scaleWH = captureW * 1.0 / inputW;
+    
+    float x1 = padAndScale(box[0], paddingW, scaleWH);
+    float y1 = padAndScale(box[1], paddingH, scaleWH);
+    float x2 = padAndScale(box[2], paddingW, scaleWH);
+    float y2 = padAndScale(box[3], paddingH, scaleWH);
     
     String label = labels[i];
     
-    resultsImage.rect(box[0], box[1], box[2] - box[0], box[3] - box[1]);
+    resultsImage.rect(x1, y1, x2 - x1, y2 - y1);
     
     if (label != null)
-      resultsImage.text(label, box[0], box[1]);
+      resultsImage.text(label, x1, y1);
   }
   
   resultsImage.endDraw();
@@ -92,7 +115,7 @@ void draw() {
     broadcastThread.update(captureAndScaleInputImage());
   }
   // Copy pixels into a PImage object and show on the screen
-  image(video, 0, 0, width, height);  
+  image(video, 0, 0, outputW, outputH);  
   
   if (debugInputImage)
     image(inputImage, 0, 0, inputW, inputH);
@@ -101,6 +124,6 @@ void draw() {
     if (receiverThread.newResultsAvailable()) {
       updateResultsImage();
     }
-    image(resultsImage, 0, 0, width, height);
+    image(resultsImage, 0, 0, outputW, outputH);
   }
 }

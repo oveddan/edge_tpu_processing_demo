@@ -118,6 +118,7 @@ def main():
             print('Socket disconnected...waiting for client')
             conn, addr = s.accept()
 
+         
         #  receiveSocket.sendto(message.encode('utf-8'), addr)
         #  senderSocket.sendto(message.encode('utf-8'), (UDP_IP, UDP_SEND_PORT))
       #  receivedBytes=bytearray()

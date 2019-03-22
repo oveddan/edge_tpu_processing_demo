@@ -46,8 +46,6 @@ class ResultsReceivingThread extends Thread {
   void parseResults(JSONObject resultsJson) {    
     JSONArray resultsList = resultsJson.getJSONArray("results");
     
-    float scaleW = 640.0 / 300.0;
-    float scaleH = 480.0 / 300.0;
     numDetections = 0;
     
     for(int i = 0; i < resultsList.size() && i < MAX_DETECTED_OBJECTS; i++) {
@@ -57,10 +55,10 @@ class ResultsReceivingThread extends Thread {
       
       JSONArray box = result.getJSONArray("box");
       
-      boxes[i][0] = box.getFloat(0) * scaleW;
-      boxes[i][1] = box.getFloat(1) * scaleH;
-      boxes[i][2] = box.getFloat(2) * scaleW;
-      boxes[i][3] = box.getFloat(3) * scaleH;
+      boxes[i][0] = box.getFloat(0);
+      boxes[i][1] = box.getFloat(1);
+      boxes[i][2] = box.getFloat(2);
+      boxes[i][3] = box.getFloat(3);
       
       numDetections++;
     }
