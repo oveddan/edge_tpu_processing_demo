@@ -2,6 +2,7 @@ import gohai.glvideo.*;
 GLCapture video;
 
 // CONFIGURATION
+// video capture dimensions
 int captureW = 320;
 int captureH = 240;
 
@@ -10,6 +11,7 @@ int captureH = 240;
 int inputW = 300;
 int inputH = 300;
 
+// output dimensions
 int outputW = 320;
 int outputH = 240;
 
@@ -114,13 +116,13 @@ void draw() {
     video.read();
     broadcastThread.update(captureAndScaleInputImage());
   }
-  // Copy pixels into a PImage object and show on the screen
-  image(video, 0, 0, outputW, outputH);  
   
   if (debugInputImage)
     image(inputImage, 0, 0, inputW, inputH);
   
   if (drawResults) {
+    // Copy pixels into a PImage object and show on the screen
+    image(video, 0, 0, outputW, outputH);  
     if (receiverThread.newResultsAvailable()) {
       updateResultsImage();
     }
