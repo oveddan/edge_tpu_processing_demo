@@ -1,23 +1,3 @@
-"""A demo for object detection.
-
-For Raspberry Pi, you need to install 'feh' as image viewer:
-sudo apt-get install feh
-
-Example (Running under python-tflite-source/edgetpu directory):
-
-  - Face detection:
-    python3.5 demo/object_detection.py \
-    --model='test_data/mobilenet_ssd_v2_face_quant_postprocess_edgetpu.tflite' \
-    --input='test_data/face.jpg'
-
-  - Pet detection:
-    python3.5 demo/object_detection.py \
-    --model='test_data/ssd_mobilenet_v1_fine_tuned_edgetpu.tflite' \
-    --label='test_data/pet_labels.txt' \
-    --input='test_data/pets.jpg'
-
-'--output' is an optional flag to specify file name of output image.
-"""
 import argparse
 import platform
 import subprocess

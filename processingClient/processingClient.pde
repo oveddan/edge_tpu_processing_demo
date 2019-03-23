@@ -3,8 +3,8 @@ GLCapture video;
 
 // CONFIGURATION
 // video capture dimensions
-int captureW = 320;
-int captureH = 240;
+int captureW = 640;
+int captureH = 480;
 
 // the width and height of the input image for
 // object detection
@@ -12,8 +12,8 @@ int inputW = 300;
 int inputH = 300;
 
 // output dimensions
-int outputW = 320;
-int outputH = 240;
+int outputW = 640;
+int outputH = 480;
 
 // drawing config
 boolean debugInputImage = false;
@@ -38,7 +38,6 @@ ResultsReceivingThread receiverThread;
 
 void settings(){
   size(outputW, outputH, P2D);
-  println(resizeW, resizeH, paddingW, paddingH);
 }
 
 void setup() {
