@@ -2,16 +2,16 @@
 
 ![](fullscreen.gif)
 
-This shows how to use the Coral Edge TPU on the Raspberry Pi to do real-time object detection 
-with a camera, and display the results in Processing.  It works by capturing frames in Processing,
+This shows how to use the [Coral Edge TPU Accelerator](https://coral.withgoogle.com/) on the Raspberry Pi to do real-time object detection 
+with a camera, and draw the results in Processing.  It works by capturing frames in [Processing,](https://processing.org/)
 streaming them over udp to a python script, which sends the frames to the Coral Edge TPU to estimate
 detections.  The results are sent back from python over TCP to processing.
 
-In Processing, both sending the data over UDP and receiving the results back over TCP are done in separate threads.
+In Processing, both sending of the data over UDP and receiving the results back over TCP are done in separate threads.
 This approach has the advantage of allowing the drawing loop to not be blocked while sending frames or parsing results, enabling
 maximum frame rate when drawing.
 
-Huge thanks to Dan Shiffman's [Processing-UDP-Video-Streaming example](https://github.com/shiffman/Processing-UDP-Video-Streaming), as well as Maksin Surguy's [Processing with the Pi Camera tutorial](https://pi.processing.org/tutorial/camera/).
+Huge thanks to goes to Dan Shiffman for his  [Processing-UDP-Video-Streaming example](https://github.com/shiffman/Processing-UDP-Video-Streaming), as well as Maksin Surguy's [Processing with the Pi Camera tutorial](https://pi.processing.org/tutorial/camera/).  These laid the foundation for how to do both udp streaming and camera capture with the raspberry pi.
 
 ## Requirements:
 
@@ -19,9 +19,12 @@ Huge thanks to Dan Shiffman's [Processing-UDP-Video-Streaming example](https://g
 * Google Coral Edge TPU Accelerator
 * Any Raspberry Pi camera that connects to the Camera port.
 
+![](./coral.jpg)
+*The Coral Edge TPU Acccelerator and Raspberry Pi 3b+*
+
 ## Setup 
 
-Install Processing on the raspberry Pi:
+Install Processing on the Raspberry Pi:
 
     curl https://processing.org/download/install-arm.sh | sudo sh
 
