@@ -8,8 +8,8 @@ int captureH = 480;
 
 // the width and height of the input image for
 // object detection
-int inputW = 300;
-int inputH = 300;
+int inputW = 640;
+int inputH = 480;
 
 // output dimensions
 int outputW = 640;

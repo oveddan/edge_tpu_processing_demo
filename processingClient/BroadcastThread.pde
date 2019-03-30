@@ -6,6 +6,7 @@ import java.io.*;
 class BroadcastThread extends Thread {
   // This is the port we are sending to
   int clientPort = 9100; 
+  String clientHost = "localhost";
   // This is our object that sends UDP out
   DatagramSocket ds; 
   PImage lastImage;
@@ -68,9 +69,9 @@ class BroadcastThread extends Thread {
     byte[] packet = baStream.toByteArray();
   
     // Send JPEG data as a datagram
-    //println("Sending datagram with " + packet.length + " bytes");
+    println("Sending datagram with " + packet.length + " bytes");
     try {
-      ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName("localhost"),clientPort));
+      ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName(clientHost),clientPort));
     } 
     catch (Exception e) {
       e.printStackTrace();
