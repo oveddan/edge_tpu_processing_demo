@@ -33,8 +33,10 @@ int paddingH = (inputH - resizeH) / 2;
 
 int fps = 25;
 
-BroadcastThread broadcastThread;
+BroadcastThread pythonBroadcastThread;
+BroadcastThread remoteBroadcastThread;
 ResultsReceivingThread receiverThread;
+
 
 void settings(){
   size(outputW, outputH, P2D);
@@ -46,8 +48,10 @@ void setup() {
   frameRate(fps);
   
   // start threads
-  broadcastThread = new BroadcastThread();
-  broadcastThread.start();
+  pythonBroadcastThread = new BroadcastThread();
+  pythonBroadcastThread.start();
+  //remoteBroadcastThread = new BroadcastThread(getRemoteBroadcastPort(), getRemoteBroadcastHost());
+  //remoteBroadcastThread.start();
   receiverThread = new ResultsReceivingThread(this);
   receiverThread.start();
 
@@ -113,7 +117,7 @@ void draw() {
   // If the camera is sending new data, capture that data
   if (video.available()) {
     video.read();
-    broadcastThread.update(captureAndScaleInputImage());
+    pythonBroadcastThread.update(captureAndScaleInputImage());
   }
   
   if (debugInputImage)

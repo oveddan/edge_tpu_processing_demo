@@ -13,7 +13,8 @@ class BroadcastThread extends Thread {
   boolean newFrame = false;
   boolean running;
   
-  BroadcastThread() { 
+  BroadcastThread() {
+    //println("Host and port:", host, port);
     // Setting up the DatagramSocket, requires try/catch
     try {
       ds = new DatagramSocket();
@@ -72,9 +73,28 @@ class BroadcastThread extends Thread {
     println("Sending datagram with " + packet.length + " bytes");
     try {
       ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName(clientHost),clientPort));
+      ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName(getRemoteBroadcastHost()),getRemoteBroadcastPort()));
     } 
     catch (Exception e) {
       e.printStackTrace();
     }
   }
+}
+
+int getRemoteBroadcastPort() {
+  String portString = System.getenv("BROADCAST_PORT");
+  
+  if (portString != null) {
+    return int(portString);
+  } else
+    return 9002;
+}
+
+String getRemoteBroadcastHost() {
+  String portString = System.getenv("BROADCAST_HOST");
+  
+  if (portString != null) {
+    return portString;
+  } else
+    return "192.168.86.170";
 }
