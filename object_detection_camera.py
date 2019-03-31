@@ -83,7 +83,7 @@ def main():
         start_s = time.time()
 
         # Run inference.
-        results = engine.DetectWithInputTensor(flattened, threshold=0.25,
+        results = engine.DetectWithInputTensor(flattened, threshold=0.2,
                        top_k=10)
         elapsed_s = time.time() - start_frame
 
