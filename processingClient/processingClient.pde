@@ -8,8 +8,9 @@ int captureH = 480;
 
 // the width and height of the input image for
 // object detection
-int inputW = 300;
-int inputH = 300;
+String broadcastHost = getRemoteBroadcastHost();
+int inputW = broadcastHost == "" ? 300 : captureW;
+int inputH = broadcastHost == "" ? 300 : captureH;
 
 // output dimensions
 int outputW = 640;
