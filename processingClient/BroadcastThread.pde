@@ -5,8 +5,8 @@ import java.io.*;
 
 class BroadcastThread extends Thread {
   // This is the port we are sending to
-  int clientPort = 9100; 
-  String clientHost = "localhost";
+  int clientPort = getRemoteBroadcastPort(); 
+  String clientHost = getRemoteBroadcastHost();
   // This is our object that sends UDP out
   DatagramSocket ds; 
   PImage lastImage;
