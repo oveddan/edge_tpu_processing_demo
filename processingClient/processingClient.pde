@@ -31,7 +31,7 @@ int paddingW = (inputW - resizeW) / 2;
 // pad image to fit input size
 int paddingH = (inputH - resizeH) / 2;
 
-int fps = 25;
+int defaultFps = 25;
 
 BroadcastThread pythonBroadcastThread;
 BroadcastThread remoteBroadcastThread;
@@ -45,7 +45,7 @@ void settings(){
 void setup() {
   inputImage = createGraphics(inputW, inputH, P2D);
   resultsImage = createGraphics(outputW, outputH, P2D);
-  frameRate(fps);
+  frameRate(getFps());
   
   // start threads
   pythonBroadcastThread = new BroadcastThread();
@@ -61,7 +61,7 @@ void setup() {
   printArray(devices);
   
   // use the first camera
-  video = new GLCapture(this, devices[0], captureW, captureH, fps);
+  video = new GLCapture(this, devices[0], captureW, captureH, getFps());
 
   video.start();
 }
@@ -131,4 +131,13 @@ void draw() {
     }
     image(resultsImage, 0, 0, outputW, outputH);
   }
+}
+
+int getFps() {
+  String fpsString = System.getenv("FPS");
+  
+  if (fpsString != null) {
+    return int(fpsString);
+  } else
+    return defaultFps;
 }

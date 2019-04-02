@@ -92,6 +92,7 @@ int getRemoteBroadcastPort() {
 
 String getRemoteBroadcastHost() {
   String portString = System.getenv("BROADCAST_HOST");
+  //println("Broadcast host:", portString);
   
   if (portString != null) {
     return portString;
