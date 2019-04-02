@@ -17,7 +17,7 @@ UDP_IP = '127.0.0.1'
 TCP_IP = UDP_IP
 #  TCP_IP = '10.0.0.1'
 UDP_RECEIVE_PORT = 9100
-UDP_SEND_PORT = 9101
+#  UDP_SEND_PORT = 9101
 TCP_PORT = 9101
 #  BUFFER_SIZE = 1024
 
@@ -69,11 +69,15 @@ def main():
   print('Connection address:', addr)
   # Open image.
   while 1:
+    print('waiting for packet')
     data, addr = receiveSocket.recvfrom(66507)
+
+    #  print('got packet of length', len(data))
 
     if (len(data) > 0):
         start_s = time.time()
 
+        #  print('processing image')
         try:
            image = Image.open(io.BytesIO(data)).convert('RGB')
         except OSError:

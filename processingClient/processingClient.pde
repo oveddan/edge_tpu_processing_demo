@@ -8,8 +8,8 @@ int captureH = 480;
 
 // the width and height of the input image for
 // object detection
-int inputW = 640;
-int inputH = 480;
+int inputW = 300;
+int inputH = 300;
 
 // output dimensions
 int outputW = 640;
@@ -50,8 +50,6 @@ void setup() {
   // start threads
   pythonBroadcastThread = new BroadcastThread();
   pythonBroadcastThread.start();
-  //remoteBroadcastThread = new BroadcastThread(getRemoteBroadcastPort(), getRemoteBroadcastHost());
-  //remoteBroadcastThread.start();
   receiverThread = new ResultsReceivingThread(this);
   receiverThread.start();
 
@@ -89,7 +87,8 @@ void updateResultsImage() {
   resultsImage.clear();
   resultsImage.noFill();
   resultsImage.stroke(#ff0000);
-  
+  resultsImage.strokeWeight(2);
+  resultsImage.textSize(18);
   
   for(int i = 0; i < numDetections; i++) {
     float[] box = boxes[i]; 

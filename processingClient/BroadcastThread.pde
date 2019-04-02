@@ -5,8 +5,10 @@ import java.io.*;
 
 class BroadcastThread extends Thread {
   // This is the port we are sending to
-  int clientPort = getRemoteBroadcastPort(); 
-  String clientHost = getRemoteBroadcastHost();
+  int clientPort = 9100; 
+  String clientHost = "127.0.0.1";
+  String broadcastHost = getRemoteBroadcastHost();
+  int broadcastPort = getRemoteBroadcastPort();
   // This is our object that sends UDP out
   DatagramSocket ds; 
   PImage lastImage;
@@ -73,7 +75,8 @@ class BroadcastThread extends Thread {
     println("Sending datagram with " + packet.length + " bytes");
     try {
       ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName(clientHost),clientPort));
-      ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName(getRemoteBroadcastHost()),getRemoteBroadcastPort()));
+      if (broadcastHost != "")
+        ds.send(new DatagramPacket(packet,packet.length, InetAddress.getByName(broadcastHost), broadcastPort));
     } 
     catch (Exception e) {
       e.printStackTrace();
@@ -81,21 +84,10 @@ class BroadcastThread extends Thread {
   }
 }
 
-int getRemoteBroadcastPort() {
-  String portString = System.getenv("BROADCAST_PORT");
-  
-  if (portString != null) {
-    return int(portString);
-  } else
-    return 9002;
+String getRemoteBroadcastHost() {
+  return getEnvValueOrDefault("BROADCAST_HOST", "");
 }
 
-String getRemoteBroadcastHost() {
-  String portString = System.getenv("BROADCAST_HOST");
-  //println("Broadcast host:", portString);
-  
-  if (portString != null) {
-    return portString;
-  } else
-    return "192.168.86.170";
+int getRemoteBroadcastPort() {
+  return getEnvValueOrDefault("BROADCAST_PORT", 0); 
 }
